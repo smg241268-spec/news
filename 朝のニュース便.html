@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>朝のニュース便</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#EEF1F5; --surface:#FFFFFF; --ink:#1B2540; --ink2:#55607A; --line:#D5DBE5;
+  --indigo:#24346B; --yamabuki:#E2A013; --yamabuki-ink:#3A2700;
+  --biz:#24346B; --ai:#0E7472; --rnd:#8A4A7B;
+  --biz-soft:#E2E7F4; --ai-soft:#DCF0EF; --rnd-soft:#F2E4EE;
+  color-scheme: light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#10162A; --surface:#19213A; --ink:#E9EDF6; --ink2:#A3ADC4; --line:#2C3656;
+    --indigo:#9FB2F0; --yamabuki:#F0B53A; --yamabuki-ink:#2A1C00;
+    --biz:#9FB2F0; --ai:#5ED0C9; --rnd:#E3A3D2;
+    --biz-soft:#222D52; --ai-soft:#133836; --rnd-soft:#3A2236;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#10162A; --surface:#19213A; --ink:#E9EDF6; --ink2:#A3ADC4; --line:#2C3656;
+  --indigo:#9FB2F0; --yamabuki:#F0B53A; --yamabuki-ink:#2A1C00;
+  --biz:#9FB2F0; --ai:#5ED0C9; --rnd:#E3A3D2;
+  --biz-soft:#222D52; --ai-soft:#133836; --rnd-soft:#3A2236;
+  color-scheme: dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 64px)}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"Zen Kaku Gothic New","Hiragino Kaku Gothic ProN","Yu Gothic","Noto Sans JP",system-ui,sans-serif;font-size:16px;line-height:1.75;-webkit-text-size-adjust:100%}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--paper)}
+button,input,textarea,select{font:inherit;color:inherit}
+a{color:var(--indigo)}
+:focus-visible{outline:3px solid var(--yamabuki);outline-offset:2px;border-radius:6px}
+.wrap{max-width:760px;margin:0 auto;padding:0 18px 120px}
+
+/* header */
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);border-bottom:1px solid var(--line)}
+.top-in{max-width:760px;margin:0 auto;padding:10px 18px;display:flex;align-items:center;gap:12px}
+.brand{font-weight:900;font-size:17px;letter-spacing:.02em;white-space:nowrap}
+.brand small{font-weight:500;color:var(--ink2);font-size:12px;margin-left:6px}
+.datepick{margin-left:auto;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:4px 8px;font-size:14px;max-width:170px}
+nav.tabs{max-width:760px;margin:0 auto;padding:0 10px;display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+nav.tabs::-webkit-scrollbar{display:none}
+nav.tabs button{border:0;background:none;padding:8px 12px 10px;font-weight:700;font-size:14px;color:var(--ink2);border-bottom:3px solid transparent;white-space:nowrap;cursor:pointer}
+nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--yamabuki)}
+
+/* hero: route line */
+.hero{padding:26px 0 8px}
+.hero .day{font-weight:900;font-size:clamp(40px,11vw,64px);line-height:1;letter-spacing:-.01em}
+.hero .day span{font-size:.38em;font-weight:700;margin-left:10px;color:var(--ink2)}
+.hero p.lead{margin:10px 0 0;color:var(--ink2)}
+.route{margin:26px 0 8px;position:relative;padding:0 4px}
+.route ol{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,1fr);position:relative}
+.route .rail{position:absolute;left:10%;right:10%;top:15px;height:6px;background:var(--line);border-radius:3px}
+.route .rail i{display:block;height:100%;width:0;background:var(--yamabuki);border-radius:3px;transition:width .5s ease}
+.route li{display:flex;flex-direction:column;align-items:center;text-align:center;position:relative}
+.route button.st{width:36px;height:36px;border-radius:50%;border:4px solid var(--line);background:var(--surface);cursor:pointer;display:grid;place-items:center;font-weight:900;font-size:15px;color:var(--ink2);transition:background .25s,border-color .25s}
+.route li.done button.st{background:var(--yamabuki);border-color:var(--yamabuki);color:var(--yamabuki-ink)}
+.route .lbl{margin-top:6px;font-size:12.5px;font-weight:700;line-height:1.35}
+.route .sub{font-size:11px;color:var(--ink2);line-height:1.3}
+.streak{display:flex;gap:16px;flex-wrap:wrap;margin:14px 0 0;color:var(--ink2);font-size:14px}
+.streak b{color:var(--ink);font-size:18px}
+
+/* sections */
+h2.sec{font-size:19px;font-weight:900;margin:34px 0 10px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.three{margin:0;padding:0;list-style:none;counter-reset:n}
+.three li{counter-increment:n;padding:10px 0 10px 38px;position:relative;border-top:1px solid var(--line)}
+.three li:first-child{border-top:0}
+.three li::before{content:counter(n);position:absolute;left:0;top:10px;width:26px;height:26px;border-radius:50%;background:var(--indigo);color:var(--surface);font-weight:900;font-size:14px;display:grid;place-items:center}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 14px;font-weight:700;font-size:14px;cursor:pointer;text-decoration:none;color:var(--ink);display:inline-flex;align-items:center;gap:6px;line-height:1.3}
+.btn.primary{background:var(--yamabuki);border-color:var(--yamabuki);color:var(--yamabuki-ink)}
+.btn.ink{background:var(--indigo);border-color:var(--indigo);color:var(--surface)}
+.btn:hover{filter:brightness(.97)}
+.counts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.count{border-radius:12px;padding:12px 14px;cursor:pointer;border:0;text-align:left}
+.count .k{font-size:13px;font-weight:700}
+.count .v{font-size:26px;font-weight:900;line-height:1.2}
+.count .v small{font-size:13px;font-weight:500;color:var(--ink2)}
+.c-biz{background:var(--biz-soft);color:var(--ink)} .c-biz .k{color:var(--biz)}
+.c-ai{background:var(--ai-soft);color:var(--ink)} .c-ai .k{color:var(--ai)}
+.c-rnd{background:var(--rnd-soft);color:var(--ink)} .c-rnd .k{color:var(--rnd)}
+.week{list-style:none;margin:0;padding:0}
+.week li{display:flex;gap:14px;padding:8px 0;border-top:1px solid var(--line)}
+.week li:first-child{border-top:0}
+.week .d{font-weight:900;min-width:68px;color:var(--indigo)}
+
+/* news list */
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:22px 0 14px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 14px;font-weight:700;font-size:14px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.card{background:var(--surface);border:1px solid var(--line);border-left:6px solid var(--biz);border-radius:12px;margin:0 0 12px;scroll-margin-top:120px}
+.card.ai{border-left-color:var(--ai)} .card.random{border-left-color:var(--rnd)}
+.card.read{opacity:.72}
+.card.playing{box-shadow:0 0 0 3px var(--yamabuki)}
+.card summary{list-style:none;cursor:pointer;padding:14px 16px;display:block}
+.card summary::-webkit-details-marker{display:none}
+.tag{font-size:12px;font-weight:700;padding:1px 8px;border-radius:6px;display:inline-block;margin-right:6px}
+.tag.biz{background:var(--biz-soft);color:var(--biz)} .tag.ai{background:var(--ai-soft);color:var(--ai)} .tag.random{background:var(--rnd-soft);color:var(--rnd)}
+.src{font-size:12px;color:var(--ink2)}
+.card h3{margin:6px 0 4px;font-size:17px;line-height:1.5;font-weight:900}
+.card .one{margin:0;color:var(--ink2);font-size:15px}
+.body{padding:0 16px 16px}
+.body ul.pts{margin:4px 0 12px;padding-left:1.2em}
+.body ul.pts li{margin:4px 0}
+.why{background:var(--paper);border-radius:10px;padding:10px 12px;font-size:15px}
+.why b{display:block;font-size:13px;color:var(--indigo)}
+dl.terms{margin:12px 0 0;font-size:14.5px}
+dl.terms dt{font-weight:900}
+dl.terms dd{margin:0 0 6px;color:var(--ink2)}
+.readbox{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:14px;cursor:pointer;margin-left:auto}
+.readbox input{width:20px;height:20px;accent-color:var(--yamabuki)}
+
+/* skim */
+.skim{list-style:none;margin:20px 0 0;padding:0}
+.skim li{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;padding:12px 0;border-top:1px solid var(--line)}
+.skim .tag{grid-row:span 2;align-self:start;margin-top:4px}
+.skim b{font-weight:900}
+.skim span{color:var(--ink2);font-size:15px}
+
+/* chat */
+.chat{display:flex;flex-direction:column;gap:10px;margin-top:16px}
+.msg{max-width:88%;padding:10px 14px;border-radius:14px;white-space:pre-wrap;font-size:15.5px}
+.msg.me{align-self:flex-end;background:var(--indigo);color:var(--surface);border-bottom-right-radius:4px}
+.msg.bot{align-self:flex-start;background:var(--surface);border:1px solid var(--line);border-bottom-left-radius:4px}
+.ctx{font-size:13px;color:var(--ink2);margin-top:14px}
+.ctx select{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:4px 8px;max-width:100%}
+.ask{display:flex;gap:8px;margin-top:12px}
+.ask textarea{flex:1;min-height:48px;max-height:160px;resize:vertical;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:10px 12px}
+.sugg{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.sugg button{font-size:13px;padding:5px 10px}
+
+/* player bar */
+.player{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--ink);color:var(--paper);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));display:none}
+.player.on{display:block}
+.player-in{max-width:760px;margin:0 auto;display:flex;align-items:center;gap:10px}
+.player .now{flex:1;min-width:0;font-size:14px;line-height:1.4}
+.player .now b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.player button{border:0;background:var(--paper);color:var(--ink);border-radius:999px;padding:6px 12px;font-weight:700;font-size:13px;cursor:pointer}
+.player select{border:0;border-radius:8px;padding:4px;background:var(--paper);color:var(--ink)}
+
+.empty{padding:40px 0;text-align:center;color:var(--ink2)}
+.note{font-size:13.5px;color:var(--ink2)}
+.srcs{margin:0;padding-left:1.2em}
+.srcs li{margin:6px 0}
+code.copy{background:var(--paper);border:1px dashed var(--line);border-radius:8px;padding:6px 10px;display:inline-block;font-family:inherit;font-weight:700;cursor:pointer}
+/* now banner + timeline */
+.nowcard{margin-top:22px;background:var(--indigo);color:var(--surface);border-radius:16px;padding:16px 18px}
+.nowcard .when{font-size:13px;font-weight:700;opacity:.85}
+.nowcard .what{font-size:18px;font-weight:900;line-height:1.5;margin:2px 0 10px}
+.nowcard .btn{background:var(--yamabuki);border-color:var(--yamabuki);color:var(--yamabuki-ink)}
+.nowcard .btn.ghost{background:transparent;color:var(--surface);border-color:rgba(255,255,255,.45)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .nowcard{background:#26335E;color:#E9EDF6}}
+:root[data-theme="dark"] .nowcard{background:#26335E;color:#E9EDF6}
+.slots{list-style:none;margin:14px 0 0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.slots li{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:10px 12px;font-size:13.5px;line-height:1.45}
+.slots li.cur{border-color:var(--yamabuki);box-shadow:inset 0 0 0 1px var(--yamabuki)}
+.slots li.ok{opacity:.65}
+.slots .t{font-weight:900;font-size:15px}
+.slots .s{color:var(--ink2)}
+/* admin */
+.set-row{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+.set-row:first-child{border-top:0;padding-top:0}
+.set-row .nm{font-weight:900}
+.set-row .ds{grid-column:1 / -1;color:var(--ink2);font-size:14px}
+.set-row input[type=time],.set-row select{border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:5px 8px;justify-self:start}
+.set-row .acts{grid-column:1 / -1;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.toggle{display:inline-flex;gap:6px;align-items:center;font-size:14px;font-weight:700;cursor:pointer}
+.toggle input{width:18px;height:18px;accent-color:var(--yamabuki)}
+.cal-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.cal-head b{font-size:17px}
+.cal-head button{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:2px 10px;cursor:pointer}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;font-size:13px}
+.cal .wd{color:var(--ink2);font-weight:700;padding:2px 0}
+.cal .dd{aspect-ratio:1;border-radius:8px;display:grid;place-items:center;background:var(--paper);font-weight:700;position:relative}
+.cal .dd.l1{background:color-mix(in srgb,var(--yamabuki) 30%,var(--paper))}
+.cal .dd.l2{background:color-mix(in srgb,var(--yamabuki) 60%,var(--paper))}
+.cal .dd.l3{background:var(--yamabuki);color:var(--yamabuki-ink)}
+.cal .dd.has::after{content:"";position:absolute;bottom:4px;width:4px;height:4px;border-radius:50%;background:var(--indigo)}
+.cal .dd.today{outline:2px solid var(--indigo)}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12.5px;color:var(--ink2);margin-top:10px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:4px}
+table.hist{width:100%;border-collapse:collapse;font-size:14.5px}
+table.hist th,table.hist td{text-align:left;padding:8px 6px;border-top:1px solid var(--line)}
+table.hist th{font-size:13px;color:var(--ink2);border-top:0}
+.tblwrap{overflow-x:auto}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.stats div{background:var(--paper);border-radius:10px;padding:10px 12px}
+.stats b{display:block;font-size:22px;font-weight:900}
+.stats span{font-size:12.5px;color:var(--ink2)}
+@media (max-width:480px){.slots{grid-template-columns:1fr}}
+/* glossary */
+.gstats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.gstats button{border:0;border-radius:12px;padding:10px 12px;text-align:left;cursor:pointer;background:var(--surface);border:1px solid var(--line)}
+.gstats b{display:block;font-size:24px;font-weight:900;line-height:1.2}
+.gstats span{font-size:12.5px;color:var(--ink2)}
+.gbar{height:8px;border-radius:4px;background:var(--line);margin:12px 0 4px;overflow:hidden;display:flex}
+.gbar i{display:block;height:100%}
+.gtools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:16px 0 10px}
+.gtools input[type=search]{flex:1;min-width:160px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 14px}
+.gtools select{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 8px}
+.term{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px}
+.term .hd{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.term .w{font-size:17px;font-weight:900}
+.term .yomi{font-size:12px;color:var(--ink2)}
+.lv{font-size:11.5px;font-weight:700;padding:1px 7px;border-radius:6px;background:var(--paper);color:var(--ink2)}
+.lv.basic{background:var(--biz-soft);color:var(--biz)} .lv.key{background:#F7E7C2;color:#6B4A00} .lv.news{background:var(--ai-soft);color:var(--ai)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .lv.key{background:#4A3810;color:#F3D08A}}
+:root[data-theme="dark"] .lv.key{background:#4A3810;color:#F3D08A}
+.term .d{margin:6px 0 0}
+.term .tip{margin:4px 0 0;font-size:14px;color:var(--ink2)}
+.term .seen{margin:6px 0 0;font-size:13px;color:var(--ink2)}
+.term .seen a{cursor:pointer}
+.term .ft{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.seg button{border:0;background:var(--surface);padding:5px 12px;font-size:13px;font-weight:700;cursor:pointer;color:var(--ink2)}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"].s-new{background:var(--line);color:var(--ink)}
+.seg button[aria-pressed="true"].s-review{background:#F2C14E;color:#3A2700}
+.seg button[aria-pressed="true"].s-known{background:var(--ai);color:var(--surface)}
+.term .meta{font-size:12px;color:var(--ink2);margin-left:auto}
+.flash{background:var(--surface);border:2px solid var(--yamabuki);border-radius:16px;padding:22px 20px;margin:16px 0;text-align:center}
+.flash .fw{font-size:clamp(24px,6vw,34px);font-weight:900;line-height:1.3;margin:8px 0}
+.flash .fd{text-align:left;margin:14px auto 0;max-width:520px}
+.flash .btnrow{justify-content:center}
+.flash .cnt{font-size:13px;color:var(--ink2)}
+dl.terms dt{cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px}
+[hidden]{display:none!important}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+@media (max-width:480px){.route .lbl{font-size:11.5px}.route .sub{display:none}.counts .v{font-size:22px}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-in">
+    <div class="brand">朝のニュース便<small id="saved"></small></div>
+    <select class="datepick" id="datePick" aria-label="日付を選ぶ"></select>
+    <a class="btn primary" data-upd target="_blank" rel="noopener" style="padding:4px 12px;font-size:13px" title="Claudeを開いて今日のニュースへの更新を頼む">更新</a>
+  </div>
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="today" aria-selected="true">今日</button>
+    <button role="tab" data-tab="news" aria-selected="false">ニュース</button>
+    <button role="tab" data-tab="skim" aria-selected="false">1分要約</button>
+    <button role="tab" data-tab="terms" aria-selected="false">用語</button>
+    <button role="tab" data-tab="ask" aria-selected="false">質問する</button>
+    <button role="tab" data-tab="admin" aria-selected="false">管理</button>
+    <button role="tab" data-tab="about" aria-selected="false">情報源・使い方</button>
+  </nav>
+</header>
+
+<main class="wrap">
+  <div id="loading" class="empty">今日のニュースを読み込んでいます…</div>
+  <div id="noData" class="empty" hidden>
+    <p>まだニュースが届いていません。</p>
+    <p class="note">下のボタンでClaudeを開き、依頼文をそのまま送ると、この画面に届きます。</p>
+    <p><a class="btn primary" data-upd target="_blank" rel="noopener">Claudeで今日のニュースを更新する</a></p>
+  </div>
+
+  <!-- TODAY -->
+  <section id="tab-today" data-panel="today" hidden>
+    <div class="hero">
+      <div class="day" id="dayBig"></div>
+      <p class="lead" id="lead"></p>
+    </div>
+    <div class="nowcard" id="nowCard">
+      <div class="when" id="nowWhen"></div>
+      <div class="what" id="nowWhat"></div>
+      <div class="btnrow" id="nowActs"></div>
+    </div>
+    <ul class="slots" id="slots" aria-label="今日の見るタイミング"></ul>
+    <div class="route" aria-label="今日のチェックシート">
+      <div class="rail"><i id="railFill"></i></div>
+      <ol id="routeList"></ol>
+    </div>
+    <div class="streak" id="streak"></div>
+
+    <h2 class="sec">今日の3行</h2>
+    <div class="panel">
+      <ol class="three" id="three"></ol>
+      <div class="btnrow">
+        <button class="btn primary" id="playAll">▶ 全部を音声で流す</button>
+        <a class="btn" id="overallVideo" target="_blank" rel="noopener">NHKの1分まとめ動画</a>
+        <button class="btn" id="randomOne">ランダムに1本</button>
+      </div>
+    </div>
+
+    <h2 class="sec">ジャンル別</h2>
+    <div class="counts" id="counts"></div>
+
+    <h2 class="sec">今日の用語</h2>
+    <div class="panel"><div id="todayTerms" class="note"></div>
+      <div class="btnrow"><button class="btn" id="goTerms">用語ページへ</button><button class="btn primary" id="todayFlash">今日の用語をカードで確認</button></div></div>
+
+    <h2 class="sec" id="weekTitle">今週の予定</h2>
+    <div class="panel"><ul class="week" id="week"></ul></div>
+  </section>
+
+  <!-- NEWS -->
+  <section data-panel="news" hidden>
+    <div class="chips" id="chips"></div>
+    <div id="cards"></div>
+  </section>
+
+  <!-- SKIM -->
+  <section data-panel="skim" hidden>
+    <h2 class="sec">1分で全部</h2>
+    <p class="note">見出しとひとことだけ。気になったら見出しを押すと詳しい要約に移ります。</p>
+    <div class="btnrow"><button class="btn primary" id="playSkim">▶ 見出しだけ音声で流す</button></div>
+    <ul class="skim" id="skimList"></ul>
+  </section>
+
+  <!-- TERMS -->
+  <section data-panel="terms" hidden>
+    <h2 class="sec">用語</h2>
+    <p class="note">社会人の基本用語、いま押さえるべき時事用語、ニュースに出てきた用語をまとめています。覚えたかどうかを記録して、復習カードで定着させましょう。</p>
+    <div class="gstats" id="gstats"></div>
+    <div class="gbar" id="gbar" aria-hidden="true"></div>
+    <div class="btnrow"><button class="btn primary" id="flashStart">復習カードを始める（10枚）</button></div>
+    <div class="flash" id="flash" hidden></div>
+    <div class="gtools">
+      <input type="search" id="gq" placeholder="用語をさがす" aria-label="用語をさがす">
+      <select id="glv" aria-label="種類"><option value="all">すべての種類</option><option value="basic">基本用語</option><option value="key">押さえるべき用語</option><option value="news">ニュースで出た用語</option></select>
+      <select id="gcat" aria-label="分野"></select>
+      <select id="gst" aria-label="記録"><option value="all">すべての記録</option><option value="new">未確認</option><option value="review">要復習</option><option value="known">覚えた</option></select>
+    </div>
+    <div id="glist"></div>
+  </section>
+
+  <!-- ASK -->
+  <section data-panel="ask" hidden>
+    <h2 class="sec">わからないことを聞く</h2>
+    <p class="note">用語や背景、「自分の仕事にどう関係する？」など何でも。答えるのはこのページに組み込まれたClaudeです。最新の情報は元記事で確かめてください。</p>
+    <div class="ctx"><label>どのニュースについて：<select id="ctxSel"></select></label></div>
+    <div class="chat" id="chat"></div>
+    <div class="sugg" id="sugg"></div>
+    <div class="ask">
+      <textarea id="q" placeholder="例：能動的サイバー防御って何？" aria-label="質問"></textarea>
+      <button class="btn ink" id="send">送る</button>
+    </div>
+    <p class="note" id="askUnavailable" hidden>この表示環境では質問機能を使えません。claude.ai でこのページを開いてください。</p>
+  </section>
+
+  <!-- ADMIN -->
+  <section data-panel="admin" hidden>
+    <h2 class="sec">見るタイミング</h2>
+    <div class="panel" id="slotSettings"></div>
+    <p class="note">ニュースの更新依頼は、朝のニュースが出そろう7時以降がおすすめです。カレンダーに入れておくと、その時間に通知が届きます。</p>
+
+    <h2 class="sec">表示と達成の設定</h2>
+    <div class="panel">
+      <div class="set-row"><span class="nm">達成ライン</span>
+        <select id="goalSel" aria-label="達成ライン"><option value="2">5つ中2つ</option><option value="3">5つ中3つ</option><option value="4">5つ中4つ</option><option value="5">5つ全部</option></select>
+        <span class="ds">この数以上チェックがついた日を「達成」として連続日数に数えます。</span></div>
+      <div class="set-row"><span class="nm">読み上げの速さ</span>
+        <select id="rateDefault" aria-label="読み上げの速さ"><option value="1">1.0×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option><option value="1.8">1.8×</option></select>
+        <span class="ds">音声再生を始めるときの速さです。</span></div>
+      <div class="set-row"><span class="nm">開いたときの画面</span>
+        <select id="startTab" aria-label="開いたときの画面"><option value="today">今日</option><option value="skim">1分要約</option><option value="news">ニュース</option></select>
+        <span class="ds">ページを開いたときに最初に表示するタブです。</span></div>
+    </div>
+
+    <h2 class="sec">記録</h2>
+    <div class="panel">
+      <div class="stats" id="stats"></div>
+      <div class="cal-head"><button id="calPrev" aria-label="前の月">‹</button><b id="calTitle"></b><button id="calNext" aria-label="次の月">›</button></div>
+      <div class="cal" id="cal"></div>
+      <div class="legend"><span><i style="background:var(--paper);border:1px solid var(--line)"></i>未着手</span><span><i style="background:color-mix(in srgb,var(--yamabuki) 30%,var(--paper))"></i>1〜2</span><span><i style="background:color-mix(in srgb,var(--yamabuki) 60%,var(--paper))"></i>3〜4</span><span><i style="background:var(--yamabuki)"></i>5つ全部</span><span>・点はニュースが届いた日</span></div>
+    </div>
+
+    <h2 class="sec">配信履歴</h2>
+    <div class="panel tblwrap"><table class="hist"><thead><tr><th>日付</th><th>本数</th><th>読んだ</th><th>チェック</th><th></th></tr></thead><tbody id="histBody"></tbody></table></div>
+
+    <h2 class="sec">データ</h2>
+    <div class="panel">
+      <div class="set-row"><span class="nm">ニュースの更新</span><a class="btn primary" data-upd target="_blank" rel="noopener">Claudeで更新を頼む</a>
+        <span class="ds">Claudeが依頼文の入った状態で開きます。依頼文はクリップボードにもコピーされるので、入っていなければ貼り付けて送ってください。</span></div>
+      <div class="set-row"><span class="nm">いつも使うチャット</span><input type="url" id="chatUrl" placeholder="https://claude.ai/chat/…（空なら新しいチャット）" style="border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:5px 8px;width:100%" aria-label="いつも使うチャットのリンク">
+        <span class="ds">このページを作ったチャットなど、決まったチャットで更新したい場合はそのリンクを貼ってください。更新ボタンがそのチャットを開くようになります。</span></div>
+      <div class="set-row"><span class="nm">依頼文</span><button class="btn" id="copyReq">依頼文をコピー</button>
+        <span class="ds" id="reqPreview"></span></div>
+      <div class="set-row"><span class="nm">表示中の日のチェック</span><button class="btn" id="resetDay">チェックをリセット</button>
+        <span class="ds">表示している日付の既読とチェックをすべて外します。</span></div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section data-panel="about" hidden>
+    <h2 class="sec">情報源</h2>
+    <div class="panel">
+      <ul class="srcs">
+        <li><b>NHKニュース（NHK ONE）</b>：社会・経済・国際の主軸。ログイン不要、1分まとめ動画もあり。</li>
+        <li><b>ITmedia NEWS／AI＋</b>：AI・IT業界の主軸。無料で全文読める記事が多い。</li>
+        <li><b>Impress Watch・時事ドットコム</b>：裏取りと補足に使用。</li>
+        <li><b>日本経済新聞</b>：見出しと要点の確認にとどめ、本文が会員限定の記事はリンク先にしません。</li>
+      </ul>
+    </div>
+    <h2 class="sec">毎日の使い方</h2>
+    <div class="panel">
+      <p style="margin-top:0">朝、右上の「更新」かこのボタンでClaudeを開き、依頼文をそのまま送るだけで、その日のニュースがこのページに追加されます。</p>
+      <a class="btn primary" data-upd target="_blank" rel="noopener">Claudeで今日のニュースを更新する</a>
+      <p class="note">チェックの記録は日付ごとに保存され、連続日数として数えます。過去の日付は右上から選べます。</p>
+    </div>
+  </section>
+</main>
+
+<div class="player" id="player" role="region" aria-label="音声再生">
+  <div class="player-in">
+    <div class="now"><span id="pIdx"></span><b id="pTitle"></b></div>
+    <select id="rate" aria-label="速さ"><option value="1">1.0×</option><option value="1.25" selected>1.25×</option><option value="1.5">1.5×</option><option value="1.8">1.8×</option></select>
+    <button id="pNext">次へ</button>
+    <button id="pStop">停止</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var CAT = {biz:{name:"社会人ニュース",short:"社会人"}, ai:{name:"AI・IT業界",short:"AI・IT"}, random:{name:"ランダム",short:"ランダム"}};
+  var WD = ["日","月","火","水","木","金","土"];
+  var state = {all:[], cur:null, filter:"all", check:{route:{},read:{},asked:false}, db:null, user:null, uid:null, sample:null, checkHist:{}, chatHist:[], calMonth:null,
+    settings:{slots:{morning:{on:true,time:"07:30"},noon:{on:true,time:"12:30"},night:{on:true,time:"21:00"}}, goal:3, rate:"1.25", startTab:"today"}};
+  var ARTIFACT_URL="https://claude.ai/artifact/Kz5aLx8RHWPYwaZ3RgpYmG";
+  var SLOT_DEF=[
+    {key:"morning", name:"朝", place:"通勤中・約10分", what:"1分動画か全体音声で全体をつかみ、社会人ニュースを読む", st:["video","biz"]},
+    {key:"noon", name:"昼", place:"昼休み・約5分", what:"AI・IT業界のニュースを読む", st:["ai"]},
+    {key:"night", name:"夜", place:"寝る前・約5分", what:"ランダムを1本読み、わからなかったことを質問する", st:["random","ask"]}
+  ];
+  var $ = function(id){return document.getElementById(id)};
+  var el = function(tag, attrs, kids){var e=document.createElement(tag); if(attrs){for(var k in attrs){ if(k==="text") e.textContent=attrs[k]; else if(k==="cls") e.className=attrs[k]; else if(k.slice(0,2)==="on") e.addEventListener(k.slice(2),attrs[k]); else e.setAttribute(k,attrs[k]); }} (kids||[]).forEach(function(c){ if(c!=null) e.appendChild(typeof c==="string"?document.createTextNode(c):c)}); return e;};
+
+  /* ---------- tabs ---------- */
+  function showTab(name){
+    document.querySelectorAll("nav.tabs button").forEach(function(b){b.setAttribute("aria-selected", String(b.dataset.tab===name))});
+    document.querySelectorAll("[data-panel]").forEach(function(p){p.hidden = p.dataset.panel!==name || (!state.cur && name!=="about" && name!=="admin" && name!=="terms")});
+    if(name==="admin") renderAdmin();
+    if(name==="terms") renderTerms();
+    window.scrollTo(0,0);
+  }
+  document.querySelectorAll("nav.tabs button").forEach(function(b){b.addEventListener("click",function(){showTab(b.dataset.tab)})});
+  var initialTab = (location.hash||"").replace("#","");
+
+  /* ---------- storage helpers (db or local fallback) ---------- */
+  function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||"null")}catch(e){return null}}
+  function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+  var saveTimer=null;
+  function saveCheck(){
+    if(!state.cur) return;
+    var key="check-"+state.cur.date;
+    var data={date:state.cur.date, route:state.check.route, read:state.check.read, asked:!!state.check.asked, done:doneCount()};
+    state.checkHist[state.cur.date]=data;
+    lsSet(key,data);
+    clearTimeout(saveTimer);
+    saveTimer=setTimeout(function(){
+      if(state.db && state.uid){
+        state.db.collection("data/users/"+state.uid).doc(key).set(data).then(function(){$("saved").textContent="記録しました"; setTimeout(function(){$("saved").textContent=""},1500)}).catch(function(){});
+      }
+    },500);
+    renderStreak();
+    if(!document.querySelector('[data-panel="admin"]').hidden) renderAdmin();
+  }
+  function loadCheck(date){
+    var key="check-"+date;
+    var local=lsGet(key)||state.checkHist[date];
+    state.check = local ? {route:local.route||{},read:local.read||{},asked:!!local.asked} : {route:{},read:{},asked:false};
+    if(state.db && state.uid){
+      state.db.collection("data/users/"+state.uid).doc(key).get().then(function(s){
+        if(s.exists && state.cur && state.cur.date===date){var d=s.data(); state.check={route:d.route||{},read:d.read||{},asked:!!d.asked}; state.checkHist[date]=d; renderAllChecks();}
+      }).catch(function(){});
+    }
+  }
+
+  /* ---------- checklist route ---------- */
+  function items(cat){return (state.cur&&state.cur.items||[]).filter(function(i){return !cat||i.cat===cat})}
+  function readCount(cat){return items(cat).filter(function(i){return state.check.read[i.id]}).length}
+  function stations(){
+    var r=state.check.route;
+    return [
+      {key:"video", lbl:"全体をつかむ", sub:"動画か音声", auto:false},
+      {key:"biz", lbl:"社会人", sub:readCount("biz")+"/"+items("biz").length+"本", auto: items("biz").length>0 && readCount("biz")===items("biz").length},
+      {key:"ai", lbl:"AI・IT", sub:readCount("ai")+"/"+items("ai").length+"本", auto: items("ai").length>0 && readCount("ai")===items("ai").length},
+      {key:"random", lbl:"ランダム", sub:"1本以上", auto: readCount("random")>0},
+      {key:"ask", lbl:"質問する", sub:"1回以上", auto: !!state.check.asked}
+    ].map(function(s){s.done = s.auto || !!r[s.key]; return s});
+  }
+  function doneCount(){return stations().filter(function(s){return s.done}).length}
+  function renderRoute(){
+    var ol=$("routeList"); ol.innerHTML="";
+    var st=stations(), n=0;
+    st.forEach(function(s,i){
+      if(s.done) n++;
+      var li=el("li",{cls:s.done?"done":""},[
+        el("button",{cls:"st","aria-pressed":String(s.done),"aria-label":s.lbl+(s.done?"（済）":"（未）"),text:s.done?"✓":String(i+1),onclick:function(){
+          if(s.auto) return;
+          state.check.route[s.key]=!state.check.route[s.key]; saveCheck(); renderRoute();
+        }}),
+        el("div",{cls:"lbl",text:s.lbl}),
+        el("div",{cls:"sub",text:s.sub})
+      ]);
+      ol.appendChild(li);
+    });
+    var last=-1; st.forEach(function(s,i){if(s.done) last=i});
+    $("railFill").style.width = last<=0 ? "0%" : (last/4*100)+"%";
+    var left=5-n;
+    renderNow();
+    $("lead").textContent = n===5 ? "今日のチェックはすべて完了。おつかれさまでした。" : "全"+items().length+"本、読むだけなら約"+Math.max(3,Math.round(items().length*0.6))+"分。あと"+left+"つでチェック完了です。";
+  }
+  function renderStreak(){
+    var hist=state.checkHist, d=new Date(), streak=0, total=0;
+    var goal=+state.settings.goal||3;
+    Object.keys(hist).forEach(function(k){ if((hist[k].done||0)>=goal) total++; });
+    for(var i=0;i<400;i++){
+      var key=ymd(d), h=hist[key];
+      if(h && (h.done||0)>=goal){streak++;}
+      else if(i>0){break;}
+      d.setDate(d.getDate()-1);
+    }
+    var s=$("streak"); s.innerHTML="";
+    s.appendChild(el("div",null,["連続 ",el("b",{text:String(streak)})," 日"]));
+    s.appendChild(el("div",null,["これまで ",el("b",{text:String(total)})," 日達成"]));
+    s.appendChild(el("div",{cls:"note",text:"5つ中"+goal+"つ以上で達成"}));
+  }
+  function renderAllChecks(){renderRoute(); renderCounts(); renderCards(); renderStreak(); renderNow();}
+
+  function ymd(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+
+  /* ---------- render today ---------- */
+  function renderToday(){
+    var c=state.cur, p=c.date.split("-"), dt=new Date(+p[0],+p[1]-1,+p[2]);
+    $("dayBig").innerHTML=""; $("dayBig").appendChild(document.createTextNode((+p[1])+"."+(+p[2])));
+    $("dayBig").appendChild(el("span",{text:WD[dt.getDay()]+"曜日"}));
+    var t=$("three"); t.innerHTML="";
+    (c.headline3||[]).forEach(function(h){t.appendChild(el("li",{text:h}))});
+    var v=$("overallVideo");
+    if(c.overallVideo&&c.overallVideo.url){v.hidden=false; v.href=c.overallVideo.url; v.textContent=c.overallVideo.title||"1分まとめ動画"; v.onclick=function(){state.check.route.video=true; saveCheck(); renderRoute();};}
+    else v.hidden=true;
+    var w=$("week"); w.innerHTML="";
+    (c.week||[]).forEach(function(x){w.appendChild(el("li",null,[el("span",{cls:"d",text:x.d}),el("span",{text:x.t})]))});
+    $("weekTitle").hidden = $("week").parentNode.hidden = !(c.week&&c.week.length);
+    renderRoute(); renderCounts();
+  }
+  function renderCounts(){
+    var box=$("counts"); box.innerHTML="";
+    [["biz","c-biz"],["ai","c-ai"],["random","c-rnd"]].forEach(function(x){
+      box.appendChild(el("button",{cls:"count "+x[1],onclick:function(){state.filter=x[0]; renderChips(); renderCards(); showTab("news")}},[
+        el("div",{cls:"k",text:CAT[x[0]].name}),
+        el("div",{cls:"v"},[String(readCount(x[0])),el("small",{text:" / "+items(x[0]).length+" 本読んだ"})])
+      ]));
+    });
+  }
+
+  /* ---------- news cards ---------- */
+  function renderChips(){
+    var c=$("chips"); c.innerHTML="";
+    [["all","すべて"],["biz","社会人"],["ai","AI・IT"],["random","ランダム"],["unread","未読だけ"]].forEach(function(x){
+      c.appendChild(el("button",{cls:"chip","aria-pressed":String(state.filter===x[0]),text:x[1],onclick:function(){state.filter=x[0]; renderChips(); renderCards();}}));
+    });
+  }
+  function ytUrl(it){return "https://www.youtube.com/results?search_query="+encodeURIComponent(it.videoQuery||it.title)}
+  function renderCards(){
+    var box=$("cards"); if(!box) return; box.innerHTML="";
+    var list=items().filter(function(i){ if(state.filter==="all") return true; if(state.filter==="unread") return !state.check.read[i.id]; return i.cat===state.filter;});
+    if(!list.length){box.appendChild(el("div",{cls:"empty",text: state.filter==="unread"?"未読はありません。":"このジャンルのニュースはありません。"})); return;}
+    list.forEach(function(it){
+      var isRead=!!state.check.read[it.id];
+      var cb=el("input",{type:"checkbox"}); cb.checked=isRead;
+      cb.addEventListener("change",function(){ if(cb.checked) state.check.read[it.id]=true; else delete state.check.read[it.id]; saveCheck(); renderRoute(); renderCounts(); card.classList.toggle("read",cb.checked);});
+      var body=el("div",{cls:"body"},[
+        el("ul",{cls:"pts"},(it.points||[]).map(function(p){return el("li",{text:p})})),
+        it.why?el("div",{cls:"why"},[el("b",{text:"仕事との関係"}),it.why]):null,
+        (it.terms&&it.terms.length)?el("dl",{cls:"terms"},[].concat.apply([],it.terms.map(function(t){return [el("dt",{text:t.w,tabindex:"0",title:"用語ページで見る",onclick:function(){openTerm(t.w)}}),el("dd",{text:t.d})]}))):null,
+        el("div",{cls:"btnrow"},[
+          el("button",{cls:"btn",text:"▶ 音声で聞く",onclick:function(){playList([it])}}),
+          el("a",{cls:"btn",href:ytUrl(it),target:"_blank",rel:"noopener",text:"関連動画を探す"}),
+          it.url?el("a",{cls:"btn",href:it.url,target:"_blank",rel:"noopener",text:"元記事（"+(it.source||"出典")+"）"}):null,
+          el("button",{cls:"btn ink",text:"これを質問する",onclick:function(){openAsk(it)}}),
+          el("label",{cls:"readbox"},[cb,"読んだ"])
+        ])
+      ]);
+      var card=el("details",{cls:"card "+it.cat+(isRead?" read":""),id:"n-"+it.id},[
+        el("summary",null,[
+          el("span",{cls:"tag "+it.cat,text:CAT[it.cat].short}),
+          el("span",{cls:"src",text:it.source||""}),
+          el("h3",{text:it.title}),
+          el("p",{cls:"one",text:it.oneLine||""})
+        ]),
+        body
+      ]);
+      box.appendChild(card);
+    });
+  }
+  function jumpTo(it){
+    state.filter="all"; renderChips(); renderCards(); showTab("news");
+    var c=$("n-"+it.id); if(c){c.open=true; setTimeout(function(){c.scrollIntoView({behavior:"smooth",block:"start"})},50);}
+  }
+
+  /* ---------- skim ---------- */
+  function renderSkim(){
+    var ul=$("skimList"); ul.innerHTML="";
+    items().forEach(function(it){
+      ul.appendChild(el("li",null,[
+        el("span",{cls:"tag "+it.cat,text:CAT[it.cat].short}),
+        el("b",null,[el("a",{href:"#",text:it.title,onclick:function(e){e.preventDefault(); jumpTo(it)}})]),
+        el("span",{text:it.oneLine||""})
+      ]));
+    });
+  }
+
+  /* ---------- speech ("video" for the link-lazy) ---------- */
+  var synth=window.speechSynthesis, queue=[], qi=0, playing=false, jaVoice=null;
+  function pickVoice(){ if(!synth) return; var vs=synth.getVoices()||[]; jaVoice = vs.find(function(v){return /ja(-|_)?JP/i.test(v.lang)&&/Google|Kyoko|O-ren|Nanami|Haruka/i.test(v.name)}) || vs.find(function(v){return /^ja/i.test(v.lang)}) || null; }
+  if(synth){ pickVoice(); if(synth.onvoiceschanged!==undefined) synth.onvoiceschanged=pickVoice; }
+  function speakText(it, full){
+    var s=CAT[it.cat].short+"。"+it.title+"。"+(it.oneLine||"");
+    if(full){ s+=" "+(it.points||[]).join("。 ")+"。"; if(it.why) s+=" 仕事との関係。"+it.why; }
+    return s;
+  }
+  function playList(list, opts){
+    if(!synth){alert("このブラウザでは音声読み上げが使えません。"); return;}
+    opts=opts||{};
+    synth.cancel();
+    queue=list.slice(); qi=0; playing=true;
+    queue.full = opts.full!==false;
+    queue.intro = opts.intro||null;
+    queue.onDone = opts.onDone||null;
+    $("player").classList.add("on");
+    if(queue.intro){ speak(queue.intro, function(){ next(0); }); $("pTitle").textContent="今日の3行"; $("pIdx").textContent="はじめに"; }
+    else next(0);
+  }
+  function speak(text, cb){
+    var u=new SpeechSynthesisUtterance(text); u.lang="ja-JP"; if(jaVoice) u.voice=jaVoice; u.rate=parseFloat($("rate").value)||1.25;
+    u.onend=function(){ if(playing) cb&&cb(); }; u.onerror=function(){ if(playing) cb&&cb(); };
+    synth.speak(u);
+  }
+  function next(i){
+    document.querySelectorAll(".card.playing").forEach(function(c){c.classList.remove("playing")});
+    if(i>=queue.length){ stop(); if(queue.onDone) queue.onDone(); return; }
+    qi=i; var it=queue[i];
+    $("pIdx").textContent=(i+1)+" / "+queue.length+"　";
+    $("pTitle").textContent=it.title;
+    var c=$("n-"+it.id); if(c){c.classList.add("playing");}
+    speak(speakText(it, queue.full), function(){ if(queue.full){state.check.read[it.id]=true; saveCheck(); renderRoute(); renderCounts(); if(c){c.classList.add("read"); var cb=c.querySelector('input[type=checkbox]'); if(cb) cb.checked=true;}} next(i+1); });
+  }
+  function stop(){ playing=false; if(synth) synth.cancel(); $("player").classList.remove("on"); document.querySelectorAll(".card.playing").forEach(function(c){c.classList.remove("playing")}); }
+  $("pStop").onclick=stop;
+  $("pNext").onclick=function(){ if(!playing) return; playing=false; synth.cancel(); playing=true; next(qi+1); };
+  $("playAll").onclick=function(){
+    var intro="おはようございます。"+state.cur.date.slice(5).replace("-","月")+"日のニュースです。まず今日の3行。"+(state.cur.headline3||[]).join(" ");
+    playList(items(), {intro:intro, onDone:function(){state.check.route.video=true; saveCheck(); renderRoute();}});
+    state.check.route.video=true; saveCheck(); renderRoute();
+  };
+  $("playSkim").onclick=function(){ playList(items(), {full:false}); };
+  $("randomOne").onclick=function(){
+    var pool=items("random").filter(function(i){return !state.check.read[i.id]}); if(!pool.length) pool=items();
+    jumpTo(pool[Math.floor(Math.random()*pool.length)]);
+  };
+
+  /* ---------- ask (Claude via sample) ---------- */
+  function renderCtx(){
+    var s=$("ctxSel"); s.innerHTML="";
+    s.appendChild(el("option",{value:"",text:"特定のニュースではない／全体について"}));
+    items().forEach(function(it){s.appendChild(el("option",{value:it.id,text:"["+CAT[it.cat].short+"] "+it.title}))});
+    renderSugg();
+  }
+  function curCtx(){var id=$("ctxSel").value; return items().find(function(i){return i.id===id})||null;}
+  function renderSugg(){
+    var b=$("sugg"); b.innerHTML=""; var it=curCtx();
+    var qs = it ? ["中学生にもわかるように説明して","自分の仕事にどう影響する？","今後どうなりそう？"].concat((it.terms||[]).slice(0,2).map(function(t){return t.w+"をもっと詳しく"}))
+               : ["今日いちばん大事なニュースは？","会社の雑談で使える話題を1つ","今日の内容でクイズを3問出して"];
+    qs.forEach(function(q){b.appendChild(el("button",{cls:"btn",text:q,onclick:function(){$("q").value=q; send();}}))});
+  }
+  $("ctxSel").addEventListener("change",function(){state.chatHist=[]; $("chat").innerHTML=""; renderSugg();});
+  function openAsk(it){ showTab("ask"); $("ctxSel").value=it?it.id:""; state.chatHist=[]; $("chat").innerHTML=""; renderSugg(); $("q").focus(); }
+  function newsDigest(){ return items().map(function(i){return "・["+CAT[i.cat].short+"] "+i.title+"："+(i.oneLine||"")}).join("\n"); }
+  var busy=false;
+  function send(){
+    var q=$("q").value.trim(); if(!q||busy) return;
+    if(!state.sample){ $("askUnavailable").hidden=false; return; }
+    busy=true; $("send").disabled=true; $("q").value="";
+    var chat=$("chat");
+    chat.appendChild(el("div",{cls:"msg me",text:q}));
+    var bot=el("div",{cls:"msg bot",text:"考えています…"}); chat.appendChild(bot);
+    bot.scrollIntoView({block:"nearest"});
+    var it=curCtx();
+    var sys="あなたは社会人向けの朝のニュース解説係です。日本語で、専門用語はかみくだき、結論から300字程度で答えてください。必要なら箇条書きは3点まで。わからないことや最新状況が不明なことは推測せず「元記事で確認を」と伝えてください。\n\n"+
+      "【今日（"+state.cur.date+"）のニュース一覧】\n"+newsDigest()+
+      (it? "\n\n【質問の対象ニュース】\n見出し："+it.title+"\n要点："+(it.points||[]).join(" / ")+"\n仕事との関係："+(it.why||"")+"\n出典："+(it.source||"")+" "+(it.url||"") : "");
+    var msgs=[];
+    if(!state.chatHist.length){ msgs.push({role:"user",content:sys+"\n\n【質問】\n"+q}); }
+    else { msgs=state.chatHist.slice(); msgs.push({role:"user",content:q}); }
+    state.sample(msgs,{cache:false,onText:function(u){bot.textContent=u.text}}).then(function(r){
+      bot.textContent=r.text;
+      if(!state.chatHist.length) state.chatHist.push({role:"user",content:sys+"\n\n【質問】\n"+q}); else state.chatHist.push({role:"user",content:q});
+      state.chatHist.push({role:"assistant",content:r.text});
+      if(!state.check.asked){ state.check.asked=true; saveCheck(); renderRoute(); }
+    }).catch(function(e){
+      if(e&&e.code==="not_granted"){ bot.textContent="質問機能が許可されませんでした。ページの「権限」メニューから許可すると使えます。"; }
+      else if(e&&e.code==="rate_limited"){ bot.textContent="質問が続いたため一時的に制限されています。少し時間をおいて送ってください。"; }
+      else bot.textContent=(e&&e.text)||"回答を受け取れませんでした。もう一度送ってください。";
+    }).then(function(){busy=false; $("send").disabled=false;});
+  }
+  $("send").onclick=send;
+  $("q").addEventListener("keydown",function(e){ if(e.key==="Enter"&&(e.metaKey||e.ctrlKey)){e.preventDefault(); send();} });
+
+
+  /* ---------- schedule (when to read) ---------- */
+  function toMin(t){var a=(t||"0:0").split(":"); return (+a[0])*60+(+a[1]);}
+  function activeSlots(){return SLOT_DEF.filter(function(s){return state.settings.slots[s.key]&&state.settings.slots[s.key].on}).map(function(s){return Object.assign({time:state.settings.slots[s.key].time},s)}).sort(function(a,b){return toMin(a.time)-toMin(b.time)});}
+  function stDone(){var m={}; stations().forEach(function(s){m[s.key]=s.done}); return m;}
+  function slotDone(s){var m=stDone(); return s.st.every(function(k){return m[k]});}
+  function slotActions(s){
+    if(s.key==="morning") return [["▶ 全体を音声で",function(){$("playAll").click()}],["社会人ニュースを開く",function(){state.filter="biz"; renderChips(); renderCards(); showTab("news")}]];
+    if(s.key==="noon") return [["AI・ITを開く",function(){state.filter="ai"; renderChips(); renderCards(); showTab("news")}]];
+    return [["ランダムに1本",function(){$("randomOne").click()}],["質問する",function(){openAsk(null)}]];
+  }
+  function renderNow(){
+    if(!state.cur || !$("nowCard")) return;
+    var box=$("nowCard"), acts=$("nowActs"); acts.innerHTML="";
+    var today=ymd(new Date()), latest=state.all[0]&&state.all[0].date;
+    var sl=activeSlots(), ul=$("slots"); ul.innerHTML="";
+    if(state.cur.date!==today){
+      $("nowWhen").textContent = state.cur.date===latest ? "今日のニュースはまだ届いていません" : "過去の日を表示しています";
+      $("nowWhat").textContent = state.cur.date===latest ? "チャットで「今日のニュースを更新して」と送ると届きます。それまでは最新の日を読めます。" : "未読を片づけるか、最新の日に戻りましょう。";
+      if(state.cur.date!==latest && latest) acts.appendChild(el("button",{cls:"btn",text:"最新の日に戻る",onclick:function(){var n=state.all[0]; select(n); fillDates();}}));
+      else { var ua=el("a",{cls:"btn",target:"_blank",rel:"noopener",text:"Claudeで更新を頼む","data-upd":""}); acts.appendChild(ua); refreshUpdLinks(); }
+      ul.hidden=true; return;
+    }
+    ul.hidden=false;
+    var now=new Date(), nm=now.getHours()*60+now.getMinutes(), cur=null, nxt=null;
+    sl.forEach(function(s){ if(toMin(s.time)<=nm) cur=s; else if(!nxt) nxt=s; });
+    var pending=sl.filter(function(s){return toMin(s.time)<=nm && !slotDone(s)});
+    if(!sl.length){ $("nowWhen").textContent="見るタイミングが未設定です"; $("nowWhat").textContent="「管理」で朝・昼・夜の時間を決めておくと、ここに今やることが出ます。"; acts.appendChild(el("button",{cls:"btn",text:"管理を開く",onclick:function(){showTab("admin")}})); }
+    else if(!cur){
+      var f=sl[0]; var mins=toMin(f.time)-nm;
+      $("nowWhen").textContent="次は"+f.name+"の時間（"+f.time+"〜、あと"+(mins>=60?Math.floor(mins/60)+"時間":"")+(mins%60)+"分）";
+      $("nowWhat").textContent=f.what+"。早めに読んでもOKです。";
+      slotActions(f).forEach(function(a){acts.appendChild(el("button",{cls:"btn",text:a[0],onclick:a[1]}))});
+    } else if(pending.length){
+      var p=pending[pending.length-1]; var late=pending.length>1;
+      $("nowWhen").textContent="いまは"+cur.name+"の時間（"+cur.place+"）"+(late?"・取りこぼしあり":"");
+      $("nowWhat").textContent=p.what+(p!==cur?"（"+p.name+"の分）":"");
+      slotActions(p).forEach(function(a){acts.appendChild(el("button",{cls:"btn",text:a[0],onclick:a[1]}))});
+      if(late) pending.slice(0,-1).forEach(function(q){acts.appendChild(el("button",{cls:"btn ghost",text:q.name+"の分も片づける",onclick:slotActions(q)[0][1]}))});
+    } else if(nxt){
+      $("nowWhen").textContent=cur.name+"の分は完了。次は"+nxt.name+"（"+nxt.time+"〜）";
+      $("nowWhat").textContent=nxt.what+"。";
+      slotActions(nxt).forEach(function(a){acts.appendChild(el("button",{cls:"btn ghost",text:"先に："+a[0],onclick:a[1]}))});
+    } else {
+      $("nowWhen").textContent="今日の予定はすべて完了";
+      $("nowWhat").textContent="おつかれさまでした。明日の朝はチャットで更新を頼むところから。";
+      acts.appendChild(el("button",{cls:"btn ghost",text:"記録を見る",onclick:function(){showTab("admin")}}));
+    }
+    sl.forEach(function(s){
+      var ok=slotDone(s), isCur=cur&&cur.key===s.key&&!ok;
+      ul.appendChild(el("li",{cls:(isCur?"cur ":"")+(ok?"ok":"")},[
+        el("div",{cls:"t",text:s.name+" "+s.time+(ok?" ✓":"")}),
+        el("div",{text:s.what}),
+        el("div",{cls:"s",text:s.place})
+      ]));
+    });
+  }
+  setInterval(renderNow, 60000);
+  document.addEventListener("visibilitychange",function(){ if(!document.hidden) renderNow(); });
+
+  /* ---------- settings ---------- */
+  function applySettings(){
+    $("rate").value=state.settings.rate||"1.25";
+    if($("goalSel")) $("goalSel").value=String(state.settings.goal||3);
+    if($("rateDefault")) $("rateDefault").value=state.settings.rate||"1.25";
+    if($("startTab")) $("startTab").value=state.settings.startTab||"today";
+    refreshUpdLinks();
+  }
+  var setTimer=null;
+  function saveSettings(){
+    lsSet("settings",state.settings);
+    clearTimeout(setTimer);
+    setTimer=setTimeout(function(){
+      if(state.db&&state.uid) state.db.collection("data/users/"+state.uid).doc("settings").set(state.settings).then(function(){$("saved").textContent="設定を保存しました"; setTimeout(function(){$("saved").textContent=""},1500)}).catch(function(){});
+    },400);
+    renderNow(); renderStreak(); renderAdmin();
+  }
+  function mergeSettings(s){
+    if(!s) return;
+    if(s.slots) Object.keys(state.settings.slots).forEach(function(k){ if(s.slots[k]) state.settings.slots[k]=Object.assign({},state.settings.slots[k],s.slots[k]); });
+    ["goal","rate","startTab","chatUrl"].forEach(function(k){ if(s[k]!=null) state.settings[k]=s[k]; });
+  }
+  mergeSettings(lsGet("settings")); applySettings();
+  $("goalSel").addEventListener("change",function(){state.settings.goal=+this.value; recomputeDone(); saveSettings();});
+  $("rateDefault").addEventListener("change",function(){state.settings.rate=this.value; $("rate").value=this.value; saveSettings();});
+  $("startTab").addEventListener("change",function(){state.settings.startTab=this.value; saveSettings();});
+  function recomputeDone(){}
+
+  function gcalUrl(s){
+    var now=new Date(), t=s.time.split(":"), d=new Date(now.getFullYear(),now.getMonth(),now.getDate(),+t[0],+t[1]);
+    if(d<now) d.setDate(d.getDate()+1);
+    var e=new Date(d.getTime()+(s.key==="morning"?10:5)*60000);
+    function f(x){return x.getFullYear()+String(x.getMonth()+1).padStart(2,"0")+String(x.getDate()).padStart(2,"0")+"T"+String(x.getHours()).padStart(2,"0")+String(x.getMinutes()).padStart(2,"0")+"00";}
+    var details=s.what+"\n"+(s.key==="morning"?"更新がまだならClaudeで更新を頼む："+(validChat(state.settings.chatUrl)||"https://claude.ai/new")+"\n":"")+"ニュース便："+ARTIFACT_URL;
+    return "https://calendar.google.com/calendar/render?action=TEMPLATE&text="+encodeURIComponent("ニュース便："+s.name+"（"+s.place+"）")+"&dates="+f(d)+"/"+f(e)+"&ctz=Asia%2FTokyo&recur="+encodeURIComponent("RRULE:FREQ=DAILY")+"&details="+encodeURIComponent(details);
+  }
+
+  /* ---------- admin page ---------- */
+  function renderAdmin(){
+    if(!$("slotSettings")) return;
+    var box=$("slotSettings"); box.innerHTML="";
+    SLOT_DEF.forEach(function(s){
+      var cfg=state.settings.slots[s.key];
+      var tm=el("input",{type:"time",value:cfg.time,"aria-label":s.name+"の時間"});
+      tm.addEventListener("change",function(){ if(tm.value){cfg.time=tm.value; saveSettings();} });
+      var on=el("input",{type:"checkbox"}); on.checked=cfg.on;
+      on.addEventListener("change",function(){cfg.on=on.checked; saveSettings();});
+      var full=Object.assign({time:cfg.time},s);
+      box.appendChild(el("div",{cls:"set-row"},[
+        el("span",{cls:"nm",text:s.name+"（"+s.place+"）"}), tm,
+        el("span",{cls:"ds",text:s.what}),
+        el("div",{cls:"acts"},[
+          el("label",{cls:"toggle"},[on,"この時間に読む"]),
+          cfg.on?el("a",{cls:"btn",href:gcalUrl(full),target:"_blank",rel:"noopener",text:"Googleカレンダーに毎日の予定として追加"}):null
+        ])
+      ]));
+    });
+    renderStats(); renderCal(); renderHist();
+  }
+  function renderStats(){
+    var hist=state.checkHist, keys=Object.keys(hist), goal=+state.settings.goal||3;
+    var ach=keys.filter(function(k){return (hist[k].done||0)>=goal}).length;
+    var reads=0; keys.forEach(function(k){reads+=Object.keys(hist[k].read||{}).length});
+    var best=0,run=0,prev=null; keys.filter(function(k){return (hist[k].done||0)>=goal}).sort().forEach(function(k){
+      var d=new Date(k+"T00:00:00"); if(prev && (d-prev)===86400000) run++; else run=1; if(run>best) best=run; prev=d; });
+    var st=$("stats"); st.innerHTML="";
+    [[ach,"達成した日"],[best,"最長の連続日数"],[reads,"読んだニュースの合計"],[termCounts().known,"覚えた用語"],[termCounts().review,"要復習の用語"],[allTerms().length,"用語の総数"]].forEach(function(x){st.appendChild(el("div",null,[el("b",{text:String(x[0])}),el("span",{text:x[1]})]))});
+  }
+  function renderCal(){
+    if(!state.calMonth){var n=new Date(); state.calMonth=new Date(n.getFullYear(),n.getMonth(),1);}
+    var m=state.calMonth, y=m.getFullYear(), mo=m.getMonth();
+    $("calTitle").textContent=y+"年"+(mo+1)+"月";
+    var c=$("cal"); c.innerHTML="";
+    WD.forEach(function(w){c.appendChild(el("div",{cls:"wd",text:w}))});
+    var first=new Date(y,mo,1).getDay(), days=new Date(y,mo+1,0).getDate(), today=ymd(new Date());
+    var newsDates={}; state.all.forEach(function(n){newsDates[n.date]=true});
+    for(var i=0;i<first;i++) c.appendChild(el("div"));
+    for(var d=1; d<=days; d++){
+      var key=y+"-"+String(mo+1).padStart(2,"0")+"-"+String(d).padStart(2,"0"), h=state.checkHist[key], dn=h?(h.done||0):0;
+      var lv= dn>=5?"l3": dn>=3?"l2": dn>=1?"l1":"";
+      var cell=el("div",{cls:"dd "+lv+(newsDates[key]?" has":"")+(key===today?" today":""),title:key+"："+dn+"/5",text:String(d)});
+      if(newsDates[key]){ cell.style.cursor="pointer"; (function(k){cell.addEventListener("click",function(){var n=state.all.find(function(x){return x.date===k}); if(n){select(n); fillDates(); showTab("today");}})})(key); }
+      c.appendChild(cell);
+    }
+  }
+  $("calPrev").onclick=function(){state.calMonth=new Date(state.calMonth.getFullYear(),state.calMonth.getMonth()-1,1); renderCal();};
+  $("calNext").onclick=function(){state.calMonth=new Date(state.calMonth.getFullYear(),state.calMonth.getMonth()+1,1); renderCal();};
+  function renderHist(){
+    var tb=$("histBody"); tb.innerHTML="";
+    if(!state.all.length){ tb.appendChild(el("tr",null,[el("td",{colspan:"5",text:"まだ配信がありません。"})])); return; }
+    state.all.forEach(function(n){
+      var h=state.checkHist[n.date]||{}, r=Object.keys(h.read||{}).length, p=n.date.split("-"), dt=new Date(+p[0],+p[1]-1,+p[2]);
+      tb.appendChild(el("tr",null,[
+        el("td",{text:(+p[1])+"/"+(+p[2])+"（"+WD[dt.getDay()]+"）"}),
+        el("td",{text:(n.items||[]).length+"本"}),
+        el("td",{text:r+"本"}),
+        el("td",{text:(h.done||0)+"/5"}),
+        el("td",null,[el("button",{cls:"btn",text:"開く",onclick:function(){select(n); fillDates(); showTab("today");}})])
+      ]));
+    });
+  }
+  function copyText(t){ if(navigator.clipboard) navigator.clipboard.writeText(t).then(function(){ $("saved").textContent="コピーしました"; setTimeout(function(){$("saved").textContent=""},1500)}).catch(function(){}); }
+  function validChat(u){ return (typeof u==="string" && /^https:\/\/claude\.ai\//.test(u.trim())) ? u.trim() : ""; }
+  function reqText(){
+    var d=ymd(new Date());
+    return "「朝のニュース便」を今日（"+d+"）の分に更新してください。\nアーティファクト："+ARTIFACT_URL+"\nnewsコレクションの既存の日と同じ形式で、社会人・AI/IT・ランダムのニュース（用語つき）、今日の3行、全体動画のリンク、今週の予定を追加してください。";
+  }
+  function updHref(){
+    var c=validChat(state.settings.chatUrl);
+    return c || ("https://claude.ai/new?q="+encodeURIComponent(reqText()));
+  }
+  function refreshUpdLinks(){
+    document.querySelectorAll("[data-upd]").forEach(function(a){
+      a.href=updHref();
+      if(!a._wired){ a._wired=true; a.addEventListener("click",function(){ a.href=updHref(); copyText(reqText()); }); }
+    });
+    if($("reqPreview")) $("reqPreview").textContent=reqText();
+    if($("chatUrl") && document.activeElement!==$("chatUrl")) $("chatUrl").value=state.settings.chatUrl||"";
+  }
+  $("chatUrl").addEventListener("change",function(){
+    var v=this.value.trim();
+    if(v && !validChat(v)){ alert("https://claude.ai/ で始まるリンクを貼ってください。"); this.value=state.settings.chatUrl||""; return; }
+    state.settings.chatUrl=v; saveSettings(); refreshUpdLinks();
+  });
+  $("copyReq").onclick=function(){copyText(reqText())};
+  refreshUpdLinks();
+  $("resetDay").onclick=function(){
+    if(!state.cur) return;
+    if(!confirm(state.cur.date+" のチェックと既読をすべて外します。よろしいですか？")) return;
+    state.check={route:{},read:{},asked:false}; saveCheck(); renderAllChecks(); renderAdmin();
+  };
+
+
+  /* ---------- glossary ---------- */
+  var LV={basic:"基本",key:"押さえるべき",news:"ニュースで出た"};
+  var ST={new:"未確認",review:"要復習",known:"覚えた"};
+  state.glossary=[]; state.termRec={}; state.flash=null;
+  function allTerms(){
+    var map={}, order=[];
+    (state.glossary||[]).forEach(function(t){ map[t.w]=Object.assign({seen:[]},t); order.push(t.w); });
+    state.all.slice().reverse().forEach(function(n){
+      (n.items||[]).forEach(function(it){
+        (it.terms||[]).forEach(function(t){
+          if(!map[t.w]){ map[t.w]={w:t.w,d:t.d,cat:it.cat==="ai"?"AI・IT":"ニュース",level:"news",seen:[]}; order.push(t.w); }
+          map[t.w].seen.push({date:n.date,id:it.id,title:it.title});
+        });
+      });
+    });
+    return order.map(function(w){return map[w]});
+  }
+  function rec(w){return state.termRec[w]||{s:"new"}}
+  function termCounts(){var c={new:0,review:0,known:0}; allTerms().forEach(function(t){c[rec(t.w).s]++}); return c;}
+  var termTimer=null;
+  function setTermStatus(w,s){
+    var r=Object.assign({},rec(w)); r.s=s; r.rv=ymd(new Date()); r.n=(r.n||0)+1; if(!r.first) r.first=r.rv;
+    state.termRec[w]=r; lsSet("termRec",state.termRec);
+    clearTimeout(termTimer);
+    termTimer=setTimeout(function(){ if(state.db&&state.uid) state.db.collection("data/users/"+state.uid).doc("terms").set({map:state.termRec}).then(function(){$("saved").textContent="用語の記録を保存しました"; setTimeout(function(){$("saved").textContent=""},1500)}).catch(function(){}); },600);
+  }
+  function renderTermStats(){
+    var c=termCounts(), tot=allTerms().length||1, g=$("gstats"); g.innerHTML="";
+    [["known","覚えた"],["review","要復習"],["new","未確認"]].forEach(function(x){
+      g.appendChild(el("button",{onclick:function(){$("gst").value=x[0]; renderTermList();}},[el("b",{text:String(c[x[0]])}),el("span",{text:x[1]})]));
+    });
+    var b=$("gbar"); b.innerHTML="";
+    b.appendChild(el("i",{style:"width:"+(c.known/tot*100)+"%;background:var(--ai)"}));
+    b.appendChild(el("i",{style:"width:"+(c.review/tot*100)+"%;background:#F2C14E"}));
+  }
+  function fillCats(){
+    var s=$("gcat"), v=s.value||"all"; s.innerHTML="";
+    s.appendChild(el("option",{value:"all",text:"すべての分野"}));
+    var cats=[]; allTerms().forEach(function(t){ if(t.cat&&cats.indexOf(t.cat)<0) cats.push(t.cat); });
+    cats.forEach(function(c){s.appendChild(el("option",{value:c,text:c}))});
+    s.value=cats.indexOf(v)>=0?v:"all";
+  }
+  function fmtD(d){var p=d.split("-"); return (+p[1])+"/"+(+p[2]);}
+  function termCard(t){
+    var r=rec(t.w);
+    var seg=el("div",{cls:"seg",role:"group","aria-label":t.w+"の記録"});
+    ["new","review","known"].forEach(function(s){
+      seg.appendChild(el("button",{cls:"s-"+s,"aria-pressed":String(r.s===s),text:ST[s],onclick:function(){setTermStatus(t.w,s); renderTerms();}}));
+    });
+    var seen=null;
+    if(t.seen&&t.seen.length){
+      var last=t.seen[t.seen.length-1];
+      seen=el("p",{cls:"seen"},["ニュースに"+t.seen.length+"回登場。最近：",el("a",{href:"#",text:fmtD(last.date)+"「"+last.title+"」",onclick:function(e){e.preventDefault(); var n=state.all.find(function(x){return x.date===last.date}); if(n){ if(state.cur.date!==n.date){select(n); fillDates();} var it=items().find(function(i){return i.id===last.id}); if(it) jumpTo(it);} }})]);
+    }
+    return el("div",{cls:"term",id:"t-"+t.w},[
+      el("div",{cls:"hd"},[el("span",{cls:"w",text:t.w}), t.yomi?el("span",{cls:"yomi",text:t.yomi}):null, el("span",{cls:"lv "+t.level,text:LV[t.level]||""}), t.cat?el("span",{cls:"lv",text:t.cat}):null]),
+      el("p",{cls:"d",text:t.d}),
+      t.tip?el("p",{cls:"tip",text:"押さえどころ："+t.tip}):null,
+      seen,
+      el("div",{cls:"ft"},[seg, el("button",{cls:"btn",text:"質問する",onclick:function(){askTerm(t)}}), r.rv?el("span",{cls:"meta",text:"最終確認 "+fmtD(r.rv)+"・"+(r.n||0)+"回"}):null])
+    ]);
+  }
+  function renderTermList(){
+    var q=($("gq").value||"").trim(), lv=$("glv").value, cat=$("gcat").value, st=$("gst").value;
+    var list=allTerms().filter(function(t){
+      if(lv!=="all" && !(lv==="news" ? (t.seen&&t.seen.length) : t.level===lv)) return false;
+      if(cat!=="all" && t.cat!==cat) return false;
+      if(st!=="all" && rec(t.w).s!==st) return false;
+      if(q && (t.w+(t.yomi||"")+t.d).indexOf(q)<0) return false;
+      return true;
+    });
+    var box=$("glist"); box.innerHTML="";
+    if(!list.length){ box.appendChild(el("div",{cls:"empty",text: allTerms().length?"条件に合う用語はありません。":"用語集がまだ届いていません。"})); return; }
+    list.forEach(function(t){box.appendChild(termCard(t))});
+  }
+  function renderTerms(){ if(!$("gstats")) return; renderTermStats(); fillCats(); renderTermList(); renderTodayTerms(); }
+  ["gq","glv","gcat","gst"].forEach(function(id){ $(id).addEventListener(id==="gq"?"input":"change", renderTermList); });
+  function todayTermList(){ var seen={}, out=[]; items().forEach(function(it){(it.terms||[]).forEach(function(t){ if(!seen[t.w]){seen[t.w]=1; out.push(t.w);} })}); var all=allTerms(); return out.map(function(w){return all.find(function(t){return t.w===w})}).filter(Boolean); }
+  function renderTodayTerms(){
+    var b=$("todayTerms"); if(!b||!state.cur) return; b.innerHTML="";
+    var tl=todayTermList(), k=tl.filter(function(t){return rec(t.w).s==="known"}).length;
+    if(!tl.length){ b.textContent="この日のニュースには用語の解説がありません。"; return; }
+    b.appendChild(document.createTextNode(tl.length+"語中 "+k+"語を覚えています：")); 
+    tl.forEach(function(t,i){ if(i) b.appendChild(document.createTextNode("、")); b.appendChild(el("a",{href:"#",text:t.w+(rec(t.w).s==="known"?"✓":""),onclick:function(e){e.preventDefault(); openTerm(t.w)}})); });
+  }
+  function openTerm(w){ showTab("terms"); $("gq").value=w; $("glv").value="all"; $("gcat").value="all"; $("gst").value="all"; renderTermList(); }
+  function askTerm(t){
+    showTab("ask"); $("ctxSel").value=""; state.chatHist=[]; $("chat").innerHTML=""; renderSugg();
+    $("q").value="「"+t.w+"」について、意味・使われる場面・ビジネスでの例を教えて。"; send();
+  }
+  /* flashcards */
+  function startFlash(pool){
+    if(!pool.length){ alert("確認する用語がありません。"); return; }
+    state.flash={cards:pool, i:0, open:false, known:0};
+    $("flash").hidden=false; drawFlash(); $("flash").scrollIntoView({block:"nearest"});
+  }
+  function drawFlash(){
+    var f=state.flash, box=$("flash"); box.innerHTML="";
+    if(f.i>=f.cards.length){
+      box.appendChild(el("div",{cls:"fw",text:"おつかれさまでした"}));
+      box.appendChild(el("p",{text:f.cards.length+"枚中 "+f.known+"枚を「覚えた」にしました。"}));
+      box.appendChild(el("div",{cls:"btnrow"},[el("button",{cls:"btn",text:"閉じる",onclick:function(){box.hidden=true; renderTerms();}})]));
+      return;
+    }
+    var t=f.cards[f.i];
+    box.appendChild(el("div",{cls:"cnt",text:(f.i+1)+" / "+f.cards.length+"・"+(LV[t.level]||"")+(t.cat?"・"+t.cat:"")}));
+    box.appendChild(el("div",{cls:"fw",text:t.w}));
+    if(!f.open){
+      box.appendChild(el("p",{cls:"note",text:"意味を思い浮かべてから開いてください。"}));
+      box.appendChild(el("div",{cls:"btnrow"},[el("button",{cls:"btn primary",text:"意味を見る",onclick:function(){f.open=true; drawFlash();}}),el("button",{cls:"btn",text:"終了",onclick:function(){box.hidden=true; renderTerms();}})]));
+    } else {
+      box.appendChild(el("div",{cls:"fd"},[el("p",{text:t.d}), t.tip?el("p",{cls:"tip note",text:"押さえどころ："+t.tip}):null]));
+      box.appendChild(el("div",{cls:"btnrow"},[
+        el("button",{cls:"btn",text:"まだ（要復習）",onclick:function(){setTermStatus(t.w,"review"); f.i++; f.open=false; drawFlash();}}),
+        el("button",{cls:"btn primary",text:"覚えた",onclick:function(){setTermStatus(t.w,"known"); f.known++; f.i++; f.open=false; drawFlash();}})
+      ]));
+    }
+  }
+  function shuffle(a){a=a.slice(); for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)); var x=a[i]; a[i]=a[j]; a[j]=x;} return a;}
+  $("flashStart").onclick=function(){
+    var all=allTerms(), today=ymd(new Date());
+    var rv=shuffle(all.filter(function(t){return rec(t.w).s==="review"}));
+    var nw=shuffle(all.filter(function(t){return rec(t.w).s==="new"}));
+    var old=all.filter(function(t){var r=rec(t.w); return r.s==="known" && r.rv && (new Date(today)-new Date(r.rv))>=7*86400000});
+    startFlash(rv.concat(nw).concat(shuffle(old)).slice(0,10));
+  };
+  $("goTerms").onclick=function(){showTab("terms")};
+  $("todayFlash").onclick=function(){ showTab("terms"); startFlash(todayTermList()); };
+  state.termRec=lsGet("termRec")||{};
+
+  /* ---------- misc ---------- */
+  setInterval(refreshUpdLinks, 60000);
+  $("datePick").addEventListener("change",function(){ var d=this.value; var n=state.all.find(function(x){return x.date===d}); if(n) select(n); });
+
+  function select(n){
+    stop();
+    state.cur=n; loadCheck(n.date);
+    $("loading").hidden=true; $("noData").hidden=true;
+    renderToday(); renderChips(); renderCards(); renderSkim(); renderCtx(); renderStreak(); renderTodayTerms();
+    var cur=document.querySelector('nav.tabs button[aria-selected="true"]');
+    showTab(cur?cur.dataset.tab:(state.settings.startTab||"today"));
+  }
+  function fillDates(){
+    var s=$("datePick"); s.innerHTML="";
+    state.all.forEach(function(n){ var p=n.date.split("-"), dt=new Date(+p[0],+p[1]-1,+p[2]); s.appendChild(el("option",{value:n.date,text:(+p[1])+"月"+(+p[2])+"日（"+WD[dt.getDay()]+"）"})); });
+    if(state.cur) s.value=state.cur.date;
+  }
+  function noData(){ $("loading").hidden=true; $("noData").hidden=false; document.querySelectorAll("[data-panel]").forEach(function(p){p.hidden=p.dataset.panel!=="about"}); }
+
+  /* ---------- boot ---------- */
+  showTab(initialTab||state.settings.startTab||"today");
+  if(!window.claude || !window.claude.use){ noData(); $("noData").querySelector("p").textContent="このページは claude.ai で開くとニュースが表示されます。"; return; }
+  window.claude.use("sample").then(function(s){ state.sample=s; if(!s) $("askUnavailable").hidden=false; });
+  Promise.all([window.claude.use("db"), window.claude.use("user")]).then(function(r){
+    state.db=r[0]; state.user=r[1];
+    if(!state.db){ noData(); return; }
+    var uidP = state.user && state.user.id ? state.user.id().then(function(id){state.uid=id}).catch(function(){}) : Promise.resolve();
+    uidP.then(function(){
+      if(state.uid){
+        state.db.collection("data/users/"+state.uid).get().then(function(q){
+          q.docs.forEach(function(d){ if(d.id.indexOf("check-")===0){ var v=d.data(); if(v&&v.date) state.checkHist[v.date]=v; } if(d.id==="settings"){ mergeSettings(d.data()); applySettings(); } if(d.id==="terms"){ var tm=d.data(); if(tm&&tm.map) state.termRec=Object.assign({},state.termRec,tm.map); } });
+          renderTerms();
+          renderStreak(); renderNow(); if(!document.querySelector('[data-panel="admin"]').hidden) renderAdmin();
+        }).catch(function(){});
+      }
+    });
+    state.db.collection("glossary").onSnapshot(function(q){
+      var list=[]; q.docs.forEach(function(d){ var v=d.data(); if(v&&v.terms) list=list.concat(v.terms); });
+      state.glossary=list; renderTerms();
+    }, function(){});
+    state.db.collection("news").orderBy("date","desc").limit(60).onSnapshot(function(q){
+      var prevDate=state.cur&&state.cur.date, wasLatest=!state.cur || (state.all[0]&&state.all[0].date===prevDate);
+      state.all=q.docs.filter(function(d){return d.exists}).map(function(d){return d.data()}).filter(function(n){return n&&n.date&&n.items});
+      if(!state.all.length){ noData(); return; }
+      var target = wasLatest ? state.all[0] : (state.all.find(function(n){return n.date===prevDate})||state.all[0]);
+      state.cur=null; fillDates(); select(target); fillDates(); renderTerms();
+    }, function(){ noData(); });
+  });
+})();
+</script>
+</body>
+</html>
